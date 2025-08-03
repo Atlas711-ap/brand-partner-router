@@ -31,11 +31,22 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     timestamp: new Date().toISOString()
   };
 
-  // TODO: Send to Google Sheets via API
-  console.log("Brand Data:", brandData);
+  // Send to Google Sheets
+  try {
+    await fetch('https://script.google.com/macros/s/AKfycbxv_FJSWnwJ4cPFAgfnTHCmpExpBMe5qqmKAesKbYnGEDSdNyW-hA_qLr2LIQaV8INfA/exec', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(brandData)
+    });
+  } catch (error) {
+    console.error('Error sending to Google Sheets:', error);
+  }
   
   return json({ success: true, message: "Thank you! We'll be in touch soon." });
 };
+
 
 export default function App() {
   const { showForm } = useLoaderData<typeof loader>();
