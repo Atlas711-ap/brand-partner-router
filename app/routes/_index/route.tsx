@@ -33,7 +33,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   // Send to Google Sheets
   try {
-    await fetch('https://script.google.com/macros/s/AKfycbxv_FJSWnwJ4cPFAgfnTHCmpExpBMe5qqmKAesKbYnGEDSdNyW-hA_qLr2LIQaV8INfA/exec', {
+    await fetch('https://script.google.com/macros/s/AKfycbxv_FJSWnwJ4cPFAgfnTHCmpExp8Me5qqmKAesKbYnGEDSdNyW-hA_qLrI2LIQAv8INfA/exec', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
