@@ -34,19 +34,20 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   console.log("BRAND DATA TO SEND:", brandData); // ADD THIS
 
   // Send to Google Sheets
-  try {
-    console.log("ATTEMPTING FETCH TO GOOGLE SHEETS"); // ADD THIS
-    const response = await fetch('https://script.google.com/macros/s/AKfycbxv_FJSWnwJ4cPFAgfnTHCmpExp8Me5qqmKAesKbYnGEDSdNyW-hA_qLrI2LIQAv8INfA/exec', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(brandData)
-    });
-    console.log("FETCH RESPONSE:", response.status); // ADD THIS
-  } catch (error) {
-    console.error('Error sending to Google Sheets:', error);
-  }
+try {
+  console.log("ATTEMPTING FETCH TO GOOGLE SHEETS");
+  const response = await fetch('https://script.google.com/macros/s/AKfycbxv_FJSWnwJ4cPFAgfnTHCmpExp8Me5qqmKAesKbYnGEDSdNyW-hA_qLrI2LIQAv8INfA/exec', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams(brandData).toString()
+  });
+  console.log("FETCH RESPONSE:", response.status);
+} catch (error) {
+  console.error('Error sending to Google Sheets:', error);
+}
+
   
   return json({ success: true, message: "Thank you! We'll be in touch soon." });
 };
