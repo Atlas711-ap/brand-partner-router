@@ -39,7 +39,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   // Send to Google Sheets
   try {
     console.log("ATTEMPTING FETCH TO GOOGLE SHEETS");
-    const response = await fetch('https://script.google.com/macros/s/AKfycbxv_FJSWnwJ4cPFAgfnTHCmpExp8Me5qqmKAesKbYnGEDSdNyW-hA_qLrI2LIQAv8INfA/exec', {
+    const response = await fetch('https://script.google.com/macros/s/AKfycbzB87iIXRvuSp0b_9GQtcAfaHMgz2cfW1zCcZ9kMtL6JSyqOt5K6yWxE_mKvBFQd57ymg/exec', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
