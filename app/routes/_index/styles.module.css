@@ -388,3 +388,18 @@
   cursor: not-allowed;
   transform: none;
 }
+
+/* ✅ ADDED: Waitlist message box */
+.waitlistMessage {
+  background: rgba(231, 76, 60, 0.1);
+  border: 1px solid #e74c3c;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.waitlistMessage p {
+  color: #e74c3c;
+  margin: 0;
+  font-weight: 500;
+}
