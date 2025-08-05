@@ -1,5 +1,3 @@
-// 🔄 route.tsx — Full Updated Version with Shipping Region Verification
-
 import type { LoaderFunctionArgs, ActionFunctionArgs } from "@remix-run/node";
 import { redirect, json } from "@remix-run/node";
 import { Form, useLoaderData, useActionData } from "@remix-run/react";
@@ -10,14 +8,24 @@ import styles from "./styles.module.css";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
+
   if (url.searchParams.get("shop")) {
     throw redirect(`/app?${url.searchParams.toString()}`);
   }
+
   return { showForm: Boolean(login) };
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
+  const shippingRegions = formData.getAll("shippingRegions[]");
+  const onlyOtherSelected =
+    shippingRegions.length === 1 && shippingRegions[0] === "Other regions (not currently supported)";
+
+  if (onlyOtherSelected) {
+    return json({ success: false, message: "We're currently only onboarding brands that ship to U.S. and Europe. Join our waitlist for future expansion!" });
+  }
+
   const brandData = {
     brandName: formData.get("brandName"),
     email: formData.get("email"),
@@ -26,27 +34,29 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     hasShopifyStore: formData.get("hasShopifyStore") === "on",
     shopifyDomain: formData.get("shopifyDomain") || "",
     apiToken: formData.get("apiToken") || "",
-    shippingRegions: formData.getAll("shippingRegions").join(", "), // ✅ New field
+    shippingRegions: shippingRegions,
     socialX: formData.get("socialX") || "",
     socialFacebook: formData.get("socialFacebook") || "",
     socialInstagram: formData.get("socialInstagram") || "",
     socialTiktok: formData.get("socialTiktok") || "",
     socialYoutube: formData.get("socialYoutube") || "",
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString()
   };
 
+  console.log("BRAND DATA TO SEND:", brandData);
+
   try {
-    const response = await fetch(
-      'https://script.google.com/macros/s/AKfycbzB87iIXRvuSp0b_9GQtcAfaHMgz2cfW1zCcZ9kMtL6JSyqOt5K6yWxE_mKvBFQd57ymg/exec',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(brandData),
-      }
-    );
+    console.log("ATTEMPTING FETCH TO GOOGLE SHEETS");
+    const response = await fetch('https://script.google.com/macros/s/AKfycbzB87iIXRvuSp0b_9GQtcAfaHMgz2cfW1zCcZ9kMtL6JSyqOt5K6yWxE_mKvBFQd57ymg/exec', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(brandData)
+    });
     console.log("FETCH RESPONSE:", response.status);
   } catch (error) {
-    console.error("Error sending to Google Sheets:", error);
+    console.error('Error sending to Google Sheets:', error);
   }
 
   return json({ success: true, message: "Welcome to ATLAS! We'll review your application and be in touch within 24 hours." });
@@ -56,24 +66,7 @@ export default function App() {
   const { showForm } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const [hasShopifyStore, setHasShopifyStore] = useState(false);
-  const [shippingRegions, setShippingRegions] = useState<string[]>([]);
   const [showWaitlistMessage, setShowWaitlistMessage] = useState(false);
-
-  const handleShippingRegionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const isChecked = e.target.checked;
-
-    let updatedRegions = isChecked
-      ? [...shippingRegions, value]
-      : shippingRegions.filter((region) => region !== value);
-
-    setShippingRegions(updatedRegions);
-
-    const hasUSOrEurope = updatedRegions.includes("United States") || updatedRegions.includes("Europe");
-    const hasOnlyOther = updatedRegions.length === 1 && updatedRegions.includes("Other regions");
-
-    setShowWaitlistMessage(!hasUSOrEurope && hasOnlyOther);
-  };
 
   if (actionData?.success) {
     return (
@@ -99,63 +92,50 @@ export default function App() {
           <p className={styles.formSubtitle}>Connect your brand to our AI-powered marketplace and reach thousands of new customers</p>
 
           <Form className={styles.brandForm} method="post">
-            {/* ... existing form fields ... */}
+            {/* ...existing fields... */}
 
             <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Shopify API Token</label>
-              <input 
-                className={styles.formInput} 
-                type="password" 
-                name="apiToken" 
-                required={hasShopifyStore}
-                placeholder="shpat_xxxxxxxxxxxxxxxxxxxxxxxx"
-              />
-              <small>🔐 This token is used <strong>only</strong> to sync your products - no other store data is accessed</small>
-            </div>
-
-            {/* ✅ Shipping Region Section */}
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel}>Which regions does your Shopify store currently ship to? *</label>
+              <label className={styles.formLabel} htmlFor="shippingRegions">Which regions does your Shopify store currently ship to? *</label>
               <div className={styles.checkboxGroup}>
                 <label className={styles.checkboxLabel}>
-                  <input 
-                    type="checkbox" 
-                    name="shippingRegions" 
+                  <input
+                    type="checkbox"
+                    name="shippingRegions[]"
                     value="United States"
-                    onChange={handleShippingRegionChange}
-                    required={!shippingRegions.includes("United States") && !shippingRegions.includes("Europe")}
+                    onChange={() => setShowWaitlistMessage(false)}
                   />
                   <span className={styles.checkboxText}>United States</span>
                 </label>
                 <label className={styles.checkboxLabel}>
-                  <input 
-                    type="checkbox" 
-                    name="shippingRegions" 
+                  <input
+                    type="checkbox"
+                    name="shippingRegions[]"
                     value="Europe"
-                    onChange={handleShippingRegionChange}
-                    required={!shippingRegions.includes("United States") && !shippingRegions.includes("Europe")}
+                    onChange={() => setShowWaitlistMessage(false)}
                   />
                   <span className={styles.checkboxText}>Europe</span>
                 </label>
                 <label className={styles.checkboxLabel}>
-                  <input 
-                    type="checkbox" 
-                    name="shippingRegions" 
-                    value="Other regions"
-                    onChange={handleShippingRegionChange}
+                  <input
+                    type="checkbox"
+                    name="shippingRegions[]"
+                    value="Other regions (not currently supported)"
+                    onChange={(e) => setShowWaitlistMessage(e.target.checked)}
                   />
                   <span className={styles.checkboxText}>Other regions (not currently supported)</span>
                 </label>
               </div>
               {showWaitlistMessage && (
                 <div className={styles.waitlistMessage}>
-                  <p>⚠️ We're currently only onboarding brands that ship to U.S. and Europe. Join our waitlist for future expansion!</p>
+                  <p>
+                    We're currently only onboarding brands that ship to U.S. and Europe. Join our waitlist for
+                    future expansion!
+                  </p>
                 </div>
               )}
             </div>
 
-            {/* ... remaining fields and submit button ... */}
-
+            {/* ...submit button and footer... */}
           </Form>
         </div>
 
