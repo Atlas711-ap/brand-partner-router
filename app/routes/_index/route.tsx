@@ -26,9 +26,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     hasShopifyStore: formData.get("hasShopifyStore") === "on",
     shopifyDomain: formData.get("shopifyDomain") || "",
     apiToken: formData.get("apiToken") || "",
-    shipsToUS: formData.get("shipsToUS") === "on",
-    shipsToEurope: formData.get("shipsToEurope") === "on", 
-    shipsToOther: formData.get("shipsToOther") === "on",
     socialX: formData.get("socialX") || "",
     socialFacebook: formData.get("socialFacebook") || "",
     socialInstagram: formData.get("socialInstagram") || "",
@@ -213,34 +210,6 @@ export default function App() {
                       placeholder="shpat_xxxxxxxxxxxxxxxxxxxxxxxx"
                     />
                     <small>🔐 This token is used <strong>only</strong> to sync your products - no other store data is accessed</small>
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label className={styles.formLabel}>Which regions does your Shopify store currently ship to?</label>
-                    <div className={styles.checkboxGroup}>
-                      <label className={styles.checkboxLabel}>
-                        <input 
-                          type="checkbox" 
-                          name="shipsToUS" 
-                        />
-                        <span className={styles.checkboxText}>🇺🇸 United States</span>
-                      </label>
-                      <label className={styles.checkboxLabel}>
-                        <input 
-                          type="checkbox" 
-                          name="shipsToEurope" 
-                        />
-                        <span className={styles.checkboxText}>🇪🇺 Europe</span>
-                      </label>
-                      <label className={styles.checkboxLabel}>
-                        <input 
-                          type="checkbox" 
-                          name="shipsToOther" 
-                        />
-                        <span className={styles.checkboxText}>🌍 Other regions (not currently supported)</span>
-                      </label>
-                    </div>
-                    <small>⚠️ We're currently only onboarding brands that ship to U.S. and Europe. Join our waitlist for future expansion!</small>
                   </div>
 
                   <div className={styles.benefitsBox}>
